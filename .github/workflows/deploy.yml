@@ -30,6 +30,7 @@ jobs:
         context: .
         file: Dockerfile.v5      #指定用Dockerfile.v5构建
         push: true
+        platforms: linux/amd64,linux/arm64   # 同时构建两种架构
         # 镜像标签：仓库地址/镜像名:时间戳-代码提交ID，保证每次镜像都是唯一的
         tags: ${{ secrets.REGISTRY_SERVER }}/cpuhyong/openclaw-k8s:${{ github.sha }}
 
