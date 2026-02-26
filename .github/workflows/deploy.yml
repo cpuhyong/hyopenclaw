@@ -4,6 +4,7 @@ name: Build and Deploy to K8s
 on:
   push:
     branches: [ "main" ]
+  workflow_dispatch:  # 加上这一行就能手动触发
 
 # 2. 工作流程
 jobs:
