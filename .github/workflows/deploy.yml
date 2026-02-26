@@ -23,6 +23,16 @@ jobs:
         username: ${{ secrets.REGISTRY_USERNAME }}
         password: ${{ secrets.REGISTRY_PASSWORD }}
 
+    # 新增：设置 Docker Buildx (用于多平台构建)
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+      with:
+        # 可选：指定构建器名称，默认会自动创建一个
+        driver-opts: |
+          image=moby/buildkit:latest
+        # 重要：确保使用 'docker-container' 驱动
+        driver: docker-container
+
     # 第三步：构建 Docker 镜像，并推送到仓库
     - name: Build and push Docker image
       uses: docker/build-push-action@v4
