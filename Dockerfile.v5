@@ -10,6 +10,7 @@ RUN curl -L -o /usr/local/bin/kubectl https://dl.k8s.io/release/v1.29.0/bin/linu
 
 #加入ll
 RUN echo "alias ll='ls -l'" >> /etc/bash.bashrc
+RUN echo "node ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 
 # 安装宿主机管理所需的系统工具
 RUN apt-get update && apt-get install -y \
