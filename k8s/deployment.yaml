@@ -1,0 +1,249 @@
+---
+# 1. 创建命名空间
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: openclaw
+---
+# 创建PV
+# 1. PersistentVolume（hostPath）
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: openclaw-workspace-pv
+  namespace: openclaw
+  labels:
+    app: openclaw
+    type: local
+spec:
+  capacity:
+    storage: 10Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  hostPath:
+    path: /data/openclaw/workspace         # 请提前创建并设置权限
+---
+# 创建PV
+# 1. PersistentVolume（hostPath）
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: openclaw-config-pv
+  namespace: openclaw
+  labels:
+    app: openclaw
+    type: local
+spec:
+  capacity:
+    storage: 5Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  hostPath:
+    path: /data/openclaw/config          # 请提前创建并设置权限
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: openclaw-secret
+  namespace: openclaw
+type: Opaque
+stringData:
+  # 生成强密码： openssl rand -hex 32
+  OPENCLAW_GATEWAY_TOKEN: "3bf1c8d516659f9027076c434c600a746399b69ff71a1895ac15e82d475b3fa9"
+  GOG_KEYRING_PASSWORD: "0caf86c4efb9ef3423a59ae04e8d2ef964a99e0e968aee78b727585eb96e598c"
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: openclaw-config
+  namespace: openclaw
+data:
+  OPENCLAW_GATEWAY_BIND: "lan"
+  OPENCLAW_GATEWAY_PORT: "18789"
+  XDG_CONFIG_HOME: "/home/node/.openclaw"
+  NODE_ENV: "production"
+  TERM: "xterm-256color"
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: openclaw-config-pvc
+  namespace: openclaw
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  selector:
+    matchLabels:
+      app: openclaw
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: openclaw-workspace-pvc
+  namespace: openclaw
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+  selector:
+    matchLabels:
+      app: openclaw
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: openclaw-gateway
+  namespace: openclaw
+  labels:
+    app: openclaw
+    component: gateway
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: openclaw
+      component: gateway
+  template:
+    metadata:
+      labels:
+        app: openclaw
+        component: gateway
+    spec:
+      # 确保挂载的卷可由容器内的 node 用户（UID 通常为 1000）写入
+      securityContext:
+        fsGroup: 1000
+      containers:
+      - name: gateway
+        image: ghcr.io/cpuhyong/hyopenclaw:latest   # 占位，稍后会被 CI 替换
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 18789
+          name: gateway
+        env:
+        # 从 ConfigMap 引入非敏感变量
+        - name: OPENCLAW_GATEWAY_BIND
+          valueFrom:
+            configMapKeyRef:
+              name: openclaw-config
+              key: OPENCLAW_GATEWAY_BIND
+        - name: OPENCLAW_GATEWAY_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: openclaw-config
+              key: OPENCLAW_GATEWAY_PORT
+        - name: XDG_CONFIG_HOME
+          valueFrom:
+            configMapKeyRef:
+              name: openclaw-config
+              key: XDG_CONFIG_HOME
+        - name: NODE_ENV
+          valueFrom:
+            configMapKeyRef:
+              name: openclaw-config
+              key: NODE_ENV
+        - name: TERM
+          valueFrom:
+            configMapKeyRef:
+              name: openclaw-config
+              key: TERM
+        # 从 Secret 引入敏感变量
+        - name: OPENCLAW_GATEWAY_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: openclaw-secret
+              key: OPENCLAW_GATEWAY_TOKEN
+        - name: GOG_KEYRING_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: openclaw-secret
+              key: GOG_KEYRING_PASSWORD
+        # 可选：显式设置 HOME（镜像可能已定义）
+        - name: HOME
+          value: "/home/node"
+        # 容器启动命令（保持与 Docker Compose 一致）
+        command:
+          - node
+          - openclaw.mjs
+          - gateway
+          - --allow-unconfigured
+        volumeMounts:
+        - name: config-data
+          mountPath: /home/node/.openclaw
+        - name: workspace-data
+          mountPath: /home/node/.openclaw/workspace
+        # 可选：资源限制
+        # resources:
+        #   requests:
+        #     memory: "256Mi"
+        #     cpu: "250m"
+        #   limits:
+        #     memory: "512Mi"
+        #     cpu: "500m"
+      volumes:
+      - name: config-data
+        persistentVolumeClaim:
+          claimName: openclaw-config-pvc
+      - name: workspace-data
+        persistentVolumeClaim:
+          claimName: openclaw-workspace-pvc
+      # 重启策略（Always 为默认值）
+      restartPolicy: Always
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: openclaw-gateway
+  namespace: openclaw
+spec:
+  selector:
+    app: openclaw
+    component: gateway
+  ports:
+  - port: 18789
+    targetPort: 18789
+    protocol: TCP
+    name: gateway
+  # ClusterIP 仅集群内访问；如需类似 Docker 的本地回环访问，可使用 kubectl port-forward
+  type: ClusterIP
+---
+# 10. 创建Ingress（可选，如果有Ingress Controller）
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: openclaw-ingress
+  namespace: openclaw
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+    - cpuhyong.store
+    - openclaw.cpuhyong.store
+    secretName: openclaw-tls-secret
+  rules:
+  - host: openclaw.cpuhyong.store
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: openclaw-gateway
+            port:
+              number: 18789
