@@ -33,13 +33,22 @@ RUN curl -L -o /tmp/glab.tar.gz https://gitlab.com/gitlab-org/cli/-/releases/v1.
 
 #加入ll
 RUN echo "alias ll='ls -l'" >> /etc/bash.bashrc
-RUN echo "node ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 
 # 安装宿主机管理所需的系统工具
-RUN set -ex; \
-    apt-get update; \
-    apt-get install -y curl net-tools sudo coreutils grep tar git wget vim-tiny; \
-    rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    net-tools \
+    sudo \
+    coreutils \
+    grep \
+    git \
+    tar \
+    wget \
+    vim-tiny \
+    && rm -rf /var/lib/apt/lists/*
+
+#安装了sudo,所以这个要加在安装的后面，不然会报错，构建过程有交互
+RUN echo "node ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 
 ###########以上我自定义##################
 
