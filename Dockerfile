@@ -36,18 +36,11 @@ RUN echo "alias ll='ls -l'" >> /etc/bash.bashrc
 RUN echo "node ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 
 # 安装宿主机管理所需的系统工具
-RUN rm -rf /var/lib/apt/lists/* && apt-get clean
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    curl \
-    net-tools \
-    sudo \
-    coreutils \
-    grep \
-    tar \
-    git \
-    wget \
-    vim-tiny \
-    && rm -rf /var/lib/apt/lists/*
+RUN set -ex; \
+    apt-get update; \
+    apt-get install -y curl net-tools sudo coreutils grep tar git wget vim-tiny; \
+    rm -rf /var/lib/apt/lists/*
+
 ###########以上我自定义##################
 
 RUN corepack enable
