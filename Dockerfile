@@ -27,7 +27,7 @@ chmod +x /usr/local/bin/argocd
 #install glab,用ARM
 RUN curl -L -o /tmp/glab.tar.gz https://gitlab.com/gitlab-org/cli/-/releases/v1.87.0/downloads/glab_1.87.0_linux_arm64.tar.gz && \
     tar -xzf /tmp/glab.tar.gz -C /tmp && \
-    mv /tmp/glab /usr/local/bin/glab && \
+    mv /tmp/bin/glab /usr/local/bin/glab && \
     chmod +x /usr/local/bin/glab && \
     rm /tmp/glab.tar.gz
 
@@ -42,6 +42,7 @@ RUN apt-get update && apt-get install -y \
     sudo \
     coreutils \
     grep \
+    tar \
     git \
     wget \
     vim-tiny \
