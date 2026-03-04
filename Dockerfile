@@ -36,7 +36,8 @@ RUN echo "alias ll='ls -l'" >> /etc/bash.bashrc
 RUN echo "node ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 
 # 安装宿主机管理所需的系统工具
-RUN apt-get update && apt-get install -y \
+RUN rm -rf /var/lib/apt/lists/* && apt-get clean
+RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     net-tools \
     sudo \
