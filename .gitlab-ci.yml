@@ -16,7 +16,7 @@ variables:
 build-push:
   stage: build-push
   image:
-    name: gcr.io/kaniko-project/executor:latest
+    name: gcr.io/kaniko-project/executor:debug
     entrypoint: [""]
   tags:
     - k8s
