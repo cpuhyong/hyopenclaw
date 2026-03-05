@@ -1,0 +1,36 @@
+stages:
+  - build
+  - test
+
+# 全局缓存配置
+cache:
+  key: ${CI_COMMIT_REF_SLUG}
+  paths:
+    - my-cache/
+
+before_script:
+  - echo "Before script section"
+
+build-job:
+  stage: build
+  tags:
+    - k8s
+  script:
+    - echo "Compiling the code..."
+    - echo "Creating cache..."
+    - mkdir -p my-cache
+    - echo "Hello from build" > my/cache/hello.txt
+    - echo "Compile complete."
+  artifacts:
+    paths:
+      - my-cache/
+
+test-job:
+  stage: test
+  tags:
+    - k8s
+  script:
+    - echo "Testing the code..."
+    - echo "Reading from cache..."
+    - cat my-cache/hello.txt
+    - echo "Test complete."
