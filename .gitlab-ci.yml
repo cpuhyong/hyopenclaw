@@ -30,7 +30,7 @@ test-job:
   tags:
     - k8s
   script:
-    - echo "Testing the code ......"
+    - echo "Testing the code .ff....."
     - echo "Reading from cache..."
     - cat my-cache/hello.txt
     - echo "Test complete."
