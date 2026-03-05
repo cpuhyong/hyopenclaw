@@ -19,7 +19,7 @@ build-job:
     - echo "Compiling the code..."
     - echo "Creating cache..."
     - mkdir -p my-cache
-    - echo "Hello from build" > my/cache/hello.txt
+    - echo "Hello from build" > my-cache/hello.txt
     - echo "Compile complete."
   artifacts:
     paths:
