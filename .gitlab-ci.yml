@@ -58,7 +58,11 @@ update-manifest:
     # 读取上一阶段生成的镜像名
     - NEW_IMAGE=$(cat ../image.txt)
     # 更新 deployment.yaml 中的镜像地址（假设文件在根目录）
-    - sed -i "s|image:.*|image: $NEW_IMAGE|g" deployment.yaml
+    # - sed -i "s|image:.*|image: $NEW_IMAGE|g" deployment.yaml
+    - >-
+      sed -i 
+      "s|image:.*|image: ${NEW_IMAGE}|g" 
+      deployment.yaml
     # 提交并推送更改
     - git config user.email "ci-bot@example.com"
     - git config user.name "CI Bot"
