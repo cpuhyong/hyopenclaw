@@ -27,7 +27,7 @@ jobs:
       
           # 新增：设置 Docker Buildx (用于多平台构建)
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v4
         with:
           # 可选：指定构建器名称，默认会自动创建一个
           driver-opts: |
