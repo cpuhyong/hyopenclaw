@@ -53,7 +53,7 @@ update-manifest:
     - apk add --no-cache sed
   script:
     # 使用 CI_JOB_TOKEN 不成功，用GITLAB_PUSHER_TOKEN克隆部署清单仓库（需提前授权）
-    - git clone https://gitlab-ci-token:${GITLAB_PUSHER_TOKEN}@gitlab.cpuhy.abrdns.com/cpuhyong/rnd/openclaw-manifests.git
+    - git clone https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.cpuhy.abrdns.com/cpuhyong/rnd/openclaw-manifests.git
     - cd openclaw-manifests
     # 读取上一阶段生成的镜像名
     - NEW_IMAGE=$(cat ../image.txt)
