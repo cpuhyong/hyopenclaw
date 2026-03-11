@@ -43,41 +43,6 @@ FROM ${OPENCLAW_NODE_BOOKWORM_IMAGE} AS build
 RUN curl -fsSL https://bun.sh/install | bash
 ENV PATH="/root/.bun/bin:${PATH}"
 
-###########以下我自定义##################
-#install kubectl ,用ARM
-RUN curl -L -o /usr/local/bin/kubectl https://dl.k8s.io/release/v1.29.0/bin/linux/arm64/kubectl && \
-    chmod +x /usr/local/bin/kubectl
-#install argocd,用ARM
-RUN curl -L -o /usr/local/bin/argocd https://github.com/argoproj/argo-cd/releases/download/v3.3.2/argocd-linux-arm64 && \
-chmod +x /usr/local/bin/argocd
-#install glab,用ARM
-RUN curl -L -o /tmp/glab.tar.gz https://gitlab.com/gitlab-org/cli/-/releases/v1.87.0/downloads/glab_1.87.0_linux_arm64.tar.gz && \
-    tar -xzf /tmp/glab.tar.gz -C /tmp && \
-    mv /tmp/bin/glab /usr/local/bin/glab && \
-    chmod +x /usr/local/bin/glab && \
-    rm /tmp/glab.tar.gz
-
-#加入ll
-RUN echo "alias ll='ls -l'" >> /etc/bash.bashrc
-
-# 安装宿主机管理所需的系统工具
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    curl \
-    net-tools \
-    sudo \
-    coreutils \
-    grep \
-    git \
-    tar \
-    wget \
-    vim-tiny \
-    && rm -rf /var/lib/apt/lists/*
-
-#安装了sudo,所以这个要加在安装的后面，不然会报错，构建过程有交互
-RUN echo "node ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
-
-###########以上我自定义##################
-
 RUN corepack enable
 
 WORKDIR /app
@@ -158,7 +123,29 @@ RUN --mount=type=cache,id=openclaw-bookworm-apt-cache,target=/var/cache/apt,shar
     --mount=type=cache,id=openclaw-bookworm-apt-lists,target=/var/lib/apt,sharing=locked \
     apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-      procps hostname curl git openssl
+      procps hostname curl git openssl \
+###########以下我自定义,记得上一行最后的 \##################
+      sudo net-tools coreutils grep tar wget vim-tiny  # ← 添加你需要的包
+
+# 安装 kubectl、argocd、glab（注意架构，你的基础镜像可能是 amd64 或 arm64）
+RUN curl -L -o /usr/local/bin/kubectl https://dl.k8s.io/release/v1.29.0/bin/linux/arm64/kubectl && \
+    chmod +x /usr/local/bin/kubectl
+RUN curl -L -o /usr/local/bin/argocd https://github.com/argoproj/argo-cd/releases/download/v3.3.2/argocd-linux-arm64 && \
+    chmod +x /usr/local/bin/argocd
+RUN curl -L -o /tmp/glab.tar.gz https://gitlab.com/gitlab-org/cli/-/releases/v1.87.0/downloads/glab_1.87.0_linux_arm64.tar.gz && \
+    tar -xzf /tmp/glab.tar.gz -C /tmp && \
+    mv /tmp/bin/glab /usr/local/bin/glab && \
+    chmod +x /usr/local/bin/glab && \
+    rm /tmp/glab.tar.gz
+
+# 添加 sudoers 配置（必须先安装 sudo）#安装了sudo,所以这个要加在安装的后面，不然会报错，构建过程有交互
+RUN echo "node ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+
+# 添加 alias（确保 bash 可用）
+RUN echo "alias ll='ls -l'" >> /etc/bash.bashrc
+
+###########以上我自定义##################
+
 
 RUN chown node:node /app
 
