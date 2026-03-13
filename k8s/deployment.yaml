@@ -127,7 +127,7 @@ spec:
         fsGroup: 1000
       containers:
       - name: gateway
-        image: ghcr.io/cpuhyong/hyopenclaw:latest   # 占位，稍后会被 CI 替换
+        image: ghcr.io/cpuhyong/hyopenclaw:f8bad8b52d8699a5bdf33ca363c7143190cc835e
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 18789
