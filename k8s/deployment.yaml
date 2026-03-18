@@ -127,7 +127,7 @@ spec:
         fsGroup: 1000
       containers:
       - name: gateway
-        image: ghcr.io/cpuhyong/hyopenclaw:189f7610deab8baac33ad4f4c23282ad3907181f
+        image: ghcr.io/cpuhyong/hyopenclaw:d3d0f4ab6446db924fc661ab94655cdbbf1d6f7d
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 18789
