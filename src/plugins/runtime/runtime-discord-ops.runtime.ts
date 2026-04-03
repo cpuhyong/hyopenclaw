@@ -1,13 +1,11 @@
-import { auditDiscordChannelPermissions as auditDiscordChannelPermissionsImpl } from "../../../extensions/discord/runtime-api.js";
 import {
+  auditDiscordChannelPermissions as auditDiscordChannelPermissionsImpl,
   listDiscordDirectoryGroupsLive as listDiscordDirectoryGroupsLiveImpl,
   listDiscordDirectoryPeersLive as listDiscordDirectoryPeersLiveImpl,
-} from "../../../extensions/discord/runtime-api.js";
-import { monitorDiscordProvider as monitorDiscordProviderImpl } from "../../../extensions/discord/runtime-api.js";
-import { probeDiscord as probeDiscordImpl } from "../../../extensions/discord/runtime-api.js";
-import { resolveDiscordChannelAllowlist as resolveDiscordChannelAllowlistImpl } from "../../../extensions/discord/runtime-api.js";
-import { resolveDiscordUserAllowlist as resolveDiscordUserAllowlistImpl } from "../../../extensions/discord/runtime-api.js";
-import {
+  monitorDiscordProvider as monitorDiscordProviderImpl,
+  probeDiscord as probeDiscordImpl,
+  resolveDiscordChannelAllowlist as resolveDiscordChannelAllowlistImpl,
+  resolveDiscordUserAllowlist as resolveDiscordUserAllowlistImpl,
   createThreadDiscord as createThreadDiscordImpl,
   deleteMessageDiscord as deleteMessageDiscordImpl,
   editChannelDiscord as editChannelDiscordImpl,
@@ -18,7 +16,7 @@ import {
   sendPollDiscord as sendPollDiscordImpl,
   sendTypingDiscord as sendTypingDiscordImpl,
   unpinMessageDiscord as unpinMessageDiscordImpl,
-} from "../../../extensions/discord/runtime-api.js";
+} from "../../plugin-sdk/discord-runtime-surface.js";
 import type { PluginRuntimeChannel } from "./types-channel.js";
 
 type RuntimeDiscordOps = Pick<
